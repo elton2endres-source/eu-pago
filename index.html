@@ -1,1476 +1,179 @@
-```html
 <!DOCTYPE html>
 <html lang="pt-BR" class="dark h-full">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Eu Pago - Rachador de Contas Inteligente</title>
-    <!-- Tailwind CSS -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <!-- FontAwesome Icons -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- Google Fonts Inter -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Eu Pago - Rachador de Contas Inteligente</title>
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- FontAwesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+  
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              50: '#ecfdf5',
+              400: '#34d399',
+              500: '#10b981',
+              600: '#059669',
+              cyan: '#06b6d4',
+              purple: '#8b5cf6',
+              gold: '#f59e0b'
+            },
+            darkbg: '#0b0c16',
+            darkcard: 'rgba(15, 23, 42, 0.75)',
+            glassborder: 'rgba(255, 255, 255, 0.08)'
+          },
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'],
+          }
+        }
+      }
+    }
+  </script>
 
-    <script>
-        tailwind.config = {
-            darkMode: 'class',
-            theme: {
-                extend: {
-                    colors: {
-                        brand: {
-                            50: '#ecfdf5',
-                            400: '#34d399',
-                            500: '#10b981',
-                            600: '#059669',
-                            cyan: '#06b6d4',
-                            purple: '#8b5cf6',
-                            gold: '#f59e0b'
-                        },
-                        darkbg: '#080c14',
-                        darkcard: 'rgba(15, 23, 42, 0.75)',
-                        glassborder: 'rgba(255, 255, 255, 0.08)'
-                    },
-                    fontFamily: {
-                        sans: ['Inter', 'sans-serif'],
-                    }
-                }
-            }
-        }
-    </script>
+  <style>
+    body {
+      font-family: 'Inter', sans-serif;
+      background-color: #0b0c16;
+      color: #f3f4f6;
+      background-image: 
+        radial-gradient(at 0% 0%, rgba(16, 185, 129, 0.12) 0px, transparent 45%),
+        radial-gradient(at 100% 100%, rgba(6, 182, 212, 0.12) 0px, transparent 45%),
+        radial-gradient(at 50% 50%, rgba(139, 92, 246, 0.05) 0px, transparent 50%);
+      background-attachment: fixed;
+    }
 
-    <style>
-        body {
-            font-family: 'Inter', sans-serif;
-            background-color: #080c14;
-            color: #f3f4f6;
-            background-image: 
-                radial-gradient(at 0% 0%, rgba(16, 185, 129, 0.12) 0px, transparent 45%),
-                radial-gradient(at 100% 100%, rgba(6, 182, 212, 0.12) 0px, transparent 45%),
-                radial-gradient(at 50% 50%, rgba(139, 92, 246, 0.05) 0px, transparent 50%);
-            background-attachment: fixed;
-        }
+    .glass-panel {
+      background: rgba(15, 23, 42, 0.75);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+    }
 
-        .glass-panel {
-            background: rgba(15, 23, 42, 0.75);
-            backdrop-filter: blur(16px);
-            -webkit-backdrop-filter: blur(16px);
-            border: 1px solid rgba(255, 255, 255, 0.08);
-        }
+    .custom-scrollbar::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-track {
+      background: rgba(0, 0, 0, 0.2);
+      border-radius: 8px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-thumb {
+      background: rgba(255, 255, 255, 0.15);
+      border-radius: 8px;
+    }
+  </style>
 
-        .glass-modal {
-            background: rgba(10, 15, 28, 0.95);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            border: 1px solid rgba(255, 255, 255, 0.15);
-        }
+  <!-- Firebase SDKs -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+    import { getFirestore, collection, addDoc, getDocs, doc, updateDoc, deleteDoc, onSnapshot, query, orderBy } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
-        .custom-scrollbar::-webkit-scrollbar {
-            width: 6px;
-            height: 6px;
-        }
-        .custom-scrollbar::-webkit-scrollbar-track {
-            background: rgba(0, 0, 0, 0.2);
-            border-radius: 8px;
-        }
-        .custom-scrollbar::-webkit-scrollbar-thumb {
-            background: rgba(255, 255, 255, 0.15);
-            border-radius: 8px;
-        }
-        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-            background: rgba(255, 255, 255, 0.3);
-        }
+    const firebaseConfig = {
+      apiKey: "AIzaSyAtxsFopxtUpBTAc_x00VKqGiJxUTdtKcY",
+      authDomain: "eu-pago.firebaseapp.com",
+      projectId: "eu-pago",
+      storageBucket: "eu-pago.appspot.com",
+      messagingSenderId: "875270746305",
+      appId: "1:875270746305:web:19e93599eda5d71ec0e440"
+    };
 
-        @keyframes pulse-subtle {
-            0%, 100% { opacity: 1; transform: scale(1); }
-            50% { opacity: 0.85; transform: scale(0.98); }
-        }
-        .pulse-subtle {
-            animation: pulse-subtle 3s infinite ease-in-out;
-        }
-    </style>
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+    window.db = db;
+    console.log("Firebase conectado com sucesso!");
+  </script>
 </head>
-<body class="h-full flex flex-col justify-between overflow-x-hidden antialiased">
+<body class="h-full flex flex-col justify-between selection:bg-brand-500 selection:text-white">
+  
+  <!-- Header -->
+  <header class="glass-panel border-b border-white/5 sticky top-0 z-50 px-4 py-3 flex items-center justify-between">
+    <div class="flex items-center space-x-3">
+      <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-brand-500 to-brand-cyan flex items-center justify-center shadow-lg shadow-brand-500/20">
+        <i class="fa-solid fa-wallet text-darkbg text-lg"></i>
+      </div>
+      <div>
+        <h1 class="font-extrabold text-lg tracking-tight bg-gradient-to-r from-white via-gray-200 to-brand-400 bg-clip-text text-transparent">
+          Eu Pago!
+        </h1>
+        <p class="text-xs text-gray-400 font-medium">ACERTOS DE CONTAS & ROLÊS</p>
+      </div>
+    </div>
+    <div class="flex items-center space-x-2">
+      <span class="px-3 py-1 text-xs font-bold rounded-full bg-amber-500/10 text-amber-400 border border-amber-500/20 flex items-center gap-1 shadow-sm">
+        <i class="fa-solid fa-crown text-[10px]"></i> PRO
+      </span>
+    </div>
+  </header>
 
-    <!-- Top Header -->
-    <header class="sticky top-0 z-30 glass-panel border-b border-gray-800/80 px-4 py-3">
-        <div class="max-w-5xl mx-auto flex items-center justify-between">
-            <div class="flex items-center space-x-3 cursor-pointer" onclick="app.switchTab('events')">
-                <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-brand-600 via-brand-500 to-brand-cyan flex items-center justify-center shadow-lg shadow-brand-500/25">
-                    <i class="fa-solid fa-wallet text-slate-950 font-extrabold text-xl"></i>
-                </div>
-                <div>
-                    <h1 class="text-xl font-black tracking-tight text-white flex items-center gap-1">
-                        Eu <span class="text-transparent bg-clip-text bg-gradient-to-r from-brand-400 to-brand-cyan">Pago!</span>
-                    </h1>
-                    <p class="text-[10px] text-gray-400 -mt-1 font-semibold uppercase tracking-wider">Acertos de Contas & Rolês</p>
-                </div>
-            </div>
-
-            <div class="flex items-center space-x-2">
-                <button onclick="app.switchTab('pro')" class="flex items-center space-x-1.5 px-3 py-1.5 rounded-full bg-gradient-to-r from-brand-gold/20 via-amber-500/10 to-purple-500/20 border border-brand-gold/30 text-amber-300 text-xs font-semibold hover:border-amber-400 transition-all">
-                    <i class="fa-solid fa-crown text-brand-gold"></i>
-                    <span class="hidden sm:inline">Eu Pago</span> <span class="text-brand-gold">PRO</span>
-                </button>
-            </div>
-        </div>
-    </header>
-
-    <!-- Main Application Canvas -->
-    <main class="flex-1 max-w-5xl w-full mx-auto p-4 md:p-6 pb-24">
-
-        <!-- Active Event Info Bar -->
-        <div id="active-event-header" class="hidden mb-6 glass-panel rounded-2xl p-4 border border-brand-500/30 bg-gradient-to-r from-brand-600/10 via-transparent to-brand-cyan/10">
-            <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-                <div class="flex items-center space-x-3">
-                    <span id="current-event-emoji" class="text-3xl p-2 rounded-xl bg-slate-900/80 border border-gray-800">🍻</span>
-                    <div>
-                        <div class="flex items-center space-x-2">
-                            <h2 id="current-event-title" class="text-xl font-bold text-white">Nome do Evento</h2>
-                            <button onclick="app.switchTab('events')" class="text-xs text-brand-400 hover:underline font-medium">(Trocar)</button>
-                        </div>
-                        <p id="current-event-desc" class="text-xs text-gray-400 mt-0.5">Descrição do evento aqui...</p>
-                    </div>
-                </div>
-
-                <div class="flex items-center justify-between w-full md:w-auto md:justify-end space-x-4 border-t md:border-t-0 pt-3 md:pt-0 border-gray-800">
-                    <div class="text-left md:text-right">
-                        <div class="text-[11px] text-gray-400 font-medium">Total em Despesas</div>
-                        <div id="current-event-total" class="text-xl font-extrabold text-brand-400">R$ 0,00</div>
-                    </div>
-                    <button onclick="app.openAddExpenseModal()" class="px-4 py-2 bg-gradient-to-r from-brand-500 to-brand-cyan hover:from-brand-600 hover:to-brand-cyan text-slate-950 font-bold text-xs rounded-xl flex items-center space-x-1.5 shadow-lg shadow-brand-500/20 active:scale-95 transition-all">
-                        <i class="fa-solid fa-plus-circle text-sm"></i>
-                        <span>Nova Despesa</span>
-                    </button>
-                </div>
-            </div>
-        </div>
-
-        <!-- TAB 1: EVENT LIST & CREATION -->
-        <section id="tab-events" class="space-y-6">
-            <div class="flex items-center justify-between">
-                <div>
-                    <h2 class="text-2xl font-black text-white tracking-tight">Seus Grupos e Rolês</h2>
-                    <p class="text-xs text-gray-400">Selecione um evento ativo ou crie um novo para rachar.</p>
-                </div>
-                <button onclick="app.openNewEventModal()" class="px-4 py-2.5 bg-gradient-to-r from-brand-500 to-brand-cyan text-slate-950 font-bold rounded-xl text-xs shadow-lg shadow-brand-500/20 flex items-center space-x-2 active:scale-95 transition-all">
-                    <i class="fa-solid fa-folder-plus"></i>
-                    <span>Criar Evento</span>
-                </button>
-            </div>
-
-            <!-- Events Grid -->
-            <div id="events-grid" class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <!-- Injected via JS -->
-            </div>
-        </section>
-
-        <!-- TAB 2: EXPENSES LOG -->
-        <section id="tab-expenses" class="hidden space-y-6">
-            <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
-                <div>
-                    <h2 class="text-2xl font-black text-white tracking-tight">Histórico de Gastos</h2>
-                    <p class="text-xs text-gray-400">Lançamentos detalhados, divisões por consumo e notas fiscais.</p>
-                </div>
-                <div class="flex items-center space-x-2 w-full sm:w-auto">
-                    <button onclick="app.openAddParticipantModal()" class="flex-1 sm:flex-none px-3 py-2 bg-slate-800 hover:bg-slate-700 text-gray-200 border border-gray-700 rounded-xl text-xs font-semibold flex items-center justify-center space-x-1.5">
-                        <i class="fa-solid fa-user-plus text-brand-cyan"></i>
-                        <span>+ Participante</span>
-                    </button>
-                    <button onclick="app.openAddExpenseModal()" class="flex-1 sm:flex-none px-4 py-2 bg-brand-500 hover:bg-brand-400 text-slate-950 font-bold rounded-xl text-xs flex items-center justify-center space-x-1.5 shadow-md shadow-brand-500/20">
-                        <i class="fa-solid fa-receipt"></i>
-                        <span>Adicionar Gasto</span>
-                    </button>
-                </div>
-            </div>
-
-            <!-- Participants Pill Bar -->
-            <div class="glass-panel p-3 rounded-2xl border border-gray-800">
-                <div class="text-[11px] font-semibold text-gray-400 uppercase tracking-wider mb-2 flex items-center justify-between">
-                    <span>Integrantes do Grupo</span>
-                    <span id="participants-count-tag" class="text-brand-400">0 pessoas</span>
-                </div>
-                <div id="participants-pills" class="flex flex-wrap gap-2">
-                    <!-- Injected via JS -->
-                </div>
-            </div>
-
-            <!-- Expenses Feed Container -->
-            <div id="expenses-list" class="space-y-3">
-                <!-- Injected via JS -->
-            </div>
-        </section>
-
-        <!-- TAB 3: SMART PIX SETTLEMENT ENGINE -->
-        <section id="tab-settlement" class="hidden space-y-6">
-            <div class="glass-panel p-5 rounded-3xl border border-brand-500/30 bg-gradient-to-br from-brand-500/10 via-transparent to-brand-cyan/10">
-                <div class="flex items-center justify-between mb-2">
-                    <div class="flex items-center space-x-2.5">
-                        <div class="w-10 h-10 rounded-xl bg-brand-500/20 border border-brand-500/40 flex items-center justify-center text-brand-400 text-lg">
-                            <i class="fa-solid fa-wand-magic-sparkles"></i>
-                        </div>
-                        <div>
-                            <h2 class="text-lg font-extrabold text-white">Acerto Inteligente por Menor Rota</h2>
-                            <p class="text-xs text-gray-400">Nosso algoritmo reduz dezenas de acertos cruzados para o menor número de PIX!</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Individual Balances Card Grid -->
-            <div>
-                <h3 class="text-sm font-bold text-gray-300 uppercase tracking-wider mb-3 flex items-center space-x-2">
-                    <i class="fa-solid fa-scale-balanced text-brand-400"></i>
-                    <span>Balanço Financeiro Individual</span>
-                </h3>
-                <div id="settlement-balances" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-                    <!-- Injected JS -->
-                </div>
-            </div>
-
-            <!-- Suggested PIX Transfers -->
-            <div>
-                <div class="flex items-center justify-between mb-3">
-                    <h3 class="text-sm font-bold text-gray-300 uppercase tracking-wider flex items-center space-x-2">
-                        <i class="fa-solid fa-money-bill-transfer text-brand-cyan"></i>
-                        <span>Transferências PIX Sugeridas</span>
-                    </h3>
-                    <span class="text-[11px] text-gray-400">Taxa de conveniência opcional: <strong class="text-emerald-400">R$ 1,00</strong></span>
-                </div>
-
-                <div id="settlement-transactions" class="space-y-3">
-                    <!-- Injected JS -->
-                </div>
-            </div>
-        </section>
-
-        <!-- TAB 4: GAMIFICATION & FUN STATS -->
-        <section id="tab-stats" class="hidden space-y-6">
-            <div>
-                <h2 class="text-2xl font-black text-white tracking-tight">Estatísticas & Zueira do Rolê</h2>
-                <p class="text-xs text-gray-400">Quem ostentou, quem economizou e quem tá devendo geral!</p>
-            </div>
-
-            <!-- Hall of Fame / Shame Badges Grid -->
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <!-- O PATRÃO -->
-                <div class="glass-panel p-5 rounded-2xl border border-amber-500/30 bg-gradient-to-br from-amber-500/10 to-transparent text-center relative overflow-hidden">
-                    <div class="absolute -top-3 -right-3 w-16 h-16 bg-amber-500/10 rounded-full blur-xl"></div>
-                    <div class="w-14 h-14 rounded-2xl bg-amber-500/20 text-amber-400 border border-amber-500/30 mx-auto flex items-center justify-center text-2xl mb-3 shadow-lg shadow-amber-500/20">
-                        <i class="fa-solid fa-crown"></i>
-                    </div>
-                    <span class="text-[10px] uppercase tracking-widest text-amber-400 font-extrabold">O Patrão do Rolê</span>
-                    <h3 id="stat-patrao-name" class="text-lg font-extrabold text-white mt-1">Ninguém</h3>
-                    <p id="stat-patrao-desc" class="text-xs text-gray-400 mt-0.5">Quem mais gastou grana até agora.</p>
-                    <div id="stat-patrao-val" class="mt-3 text-sm font-black text-amber-400">R$ 0,00</div>
-                </div>
-
-                <!-- O MÃO DE VACA -->
-                <div class="glass-panel p-5 rounded-2xl border border-emerald-500/30 bg-gradient-to-br from-emerald-500/10 to-transparent text-center relative overflow-hidden">
-                    <div class="w-14 h-14 rounded-2xl bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 mx-auto flex items-center justify-center text-2xl mb-3 shadow-lg shadow-emerald-500/20">
-                        <i class="fa-solid fa-piggy-bank"></i>
-                    </div>
-                    <span class="text-[10px] uppercase tracking-widest text-emerald-400 font-extrabold">Mão de Vaca</span>
-                    <h3 id="stat-maodevaca-name" class="text-lg font-extrabold text-white mt-1">Ninguém</h3>
-                    <p id="stat-maodevaca-desc" class="text-xs text-gray-400 mt-0.5">Quem menos desembolsou no grupo.</p>
-                    <div id="stat-maodevaca-val" class="mt-3 text-sm font-black text-emerald-400">R$ 0,00</div>
-                </div>
-
-                <!-- CALOTEIRO DO DIA -->
-                <div class="glass-panel p-5 rounded-2xl border border-red-500/30 bg-gradient-to-br from-red-500/10 to-transparent text-center relative overflow-hidden">
-                    <div class="w-14 h-14 rounded-2xl bg-red-500/20 text-red-400 border border-red-500/30 mx-auto flex items-center justify-center text-2xl mb-3 shadow-lg shadow-red-500/20">
-                        <i class="fa-solid fa-user-ninja"></i>
-                    </div>
-                    <span class="text-[10px] uppercase tracking-widest text-red-400 font-extrabold">Maior Devedor</span>
-                    <h3 id="stat-caloteiro-name" class="text-lg font-extrabold text-white mt-1">Ninguém</h3>
-                    <p id="stat-caloteiro-desc" class="text-xs text-gray-400 mt-0.5">Quem precisa fazer o PIX com urgência!</p>
-                    <div id="stat-caloteiro-val" class="mt-3 text-sm font-black text-red-400">R$ 0,00</div>
-                </div>
-            </div>
-
-            <!-- Spending by Category Chart simulation -->
-            <div class="glass-panel p-5 rounded-3xl border border-gray-800">
-                <h3 class="text-sm font-bold text-white mb-4 flex items-center space-x-2">
-                    <i class="fa-solid fa-chart-pie text-brand-cyan"></i>
-                    <span>Gastos por Categoria</span>
-                </h3>
-                <div id="category-bars-container" class="space-y-3">
-                    <!-- Injected JS -->
-                </div>
-            </div>
-        </section>
-
-        <!-- TAB 5: PRO / MONETIZATION -->
-        <section id="tab-pro" class="hidden space-y-6">
-            <div class="relative overflow-hidden rounded-3xl p-8 glass-panel border border-amber-500/40 bg-gradient-to-br from-amber-500/15 via-purple-900/20 to-brand-900/30 text-center">
-                <div class="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-tr from-amber-500 to-brand-gold text-slate-950 mb-4 text-3xl font-black shadow-xl shadow-amber-500/25">
-                    <i class="fa-solid fa-crown"></i>
-                </div>
-                <h2 class="text-3xl font-black text-white tracking-tight">Eu Pago <span class="text-transparent bg-clip-text bg-gradient-to-r from-amber-400 to-brand-gold">PRO</span></h2>
-                <p class="text-gray-300 max-w-lg mx-auto text-xs sm:text-sm mt-2">
-                    Automatize todas as suas viagens, eventos e churrascos sem limites.
-                </p>
-                <div class="mt-4 inline-block bg-amber-400/10 border border-amber-400/30 text-amber-300 px-4 py-1.5 rounded-full text-xs font-bold">
-                    Apenas R$ 9,90 / mês ou R$ 59,90 / ano
-                </div>
-
-                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mt-8 text-left">
-                    <div class="p-4 rounded-2xl glass-panel border border-gray-800">
-                        <i class="fa-solid fa-camera text-brand-cyan text-2xl mb-2"></i>
-                        <h4 class="font-bold text-white text-sm">Leitor de Nota por Foto (OCR)</h4>
-                        <p class="text-xs text-gray-400 mt-1">Escaneie o cupom do bar e o app lê todos os itens e preços sozinho.</p>
-                    </div>
-                    <div class="p-4 rounded-2xl glass-panel border border-gray-800">
-                        <i class="fa-solid fa-cloud-arrow-up text-brand-purple text-2xl mb-2"></i>
-                        <h4 class="font-bold text-white text-sm">Backup Automático na Nuvem</h4>
-                        <p class="text-xs text-gray-400 mt-1">Sincronize com os celulares de todos os amigos em tempo real.</p>
-                    </div>
-                    <div class="p-4 rounded-2xl glass-panel border border-gray-800">
-                        <i class="fa-solid fa-globe text-brand-400 text-2xl mb-2"></i>
-                        <h4 class="font-bold text-white text-sm">Multi-Moeda Ilimitado</h4>
-                        <p class="text-xs text-gray-400 mt-1">Dólar, Euro e Peso convertidos automaticamente na cotação oficial.</p>
-                    </div>
-                </div>
-
-                <button onclick="app.simulateSubscription()" class="mt-8 px-8 py-3.5 bg-gradient-to-r from-amber-500 via-amber-400 to-brand-gold hover:opacity-90 text-slate-950 font-black rounded-2xl shadow-xl shadow-amber-500/20 text-sm tracking-wide transition-all transform active:scale-95">
-                    <i class="fa-solid fa-bolt mr-2"></i> Assinar Versão PRO (7 Dias Grátis)
-                </button>
-            </div>
-        </section>
-
-    </main>
-
-    <!-- Bottom Navigation Bar -->
-    <nav class="fixed bottom-0 left-0 right-0 z-30 glass-panel border-t border-gray-800 px-3 py-2">
-        <div class="max-w-md mx-auto flex items-center justify-around">
-            <button onclick="app.switchTab('events')" id="nav-events" class="nav-btn flex flex-col items-center py-1 px-2.5 text-brand-400 transition-colors">
-                <i class="fa-solid fa-folder-open text-base"></i>
-                <span class="text-[10px] font-semibold mt-1">Rolês</span>
-            </button>
-            <button onclick="app.switchTab('expenses')" id="nav-expenses" class="nav-btn flex flex-col items-center py-1 px-2.5 text-gray-400 hover:text-gray-200 transition-colors">
-                <i class="fa-solid fa-receipt text-base"></i>
-                <span class="text-[10px] font-semibold mt-1">Gastos</span>
-            </button>
-            <button onclick="app.switchTab('settlement')" id="nav-settlement" class="nav-btn flex flex-col items-center py-1 px-2.5 text-gray-400 hover:text-gray-200 transition-colors">
-                <i class="fa-solid fa-calculator text-base"></i>
-                <span class="text-[10px] font-semibold mt-1">Acerto PIX</span>
-            </button>
-            <button onclick="app.switchTab('stats')" id="nav-stats" class="nav-btn flex flex-col items-center py-1 px-2.5 text-gray-400 hover:text-gray-200 transition-colors">
-                <i class="fa-solid fa-trophy text-base"></i>
-                <span class="text-[10px] font-semibold mt-1">Zueira</span>
-            </button>
-            <button onclick="app.switchTab('pro')" id="nav-pro" class="nav-btn flex flex-col items-center py-1 px-2.5 text-amber-400 hover:text-amber-300 transition-colors">
-                <i class="fa-solid fa-crown text-base"></i>
-                <span class="text-[10px] font-semibold mt-1">PRO</span>
-            </button>
-        </div>
-    </nav>
-
-    <!-- MODAL: NEW EVENT -->
-    <div id="modal-event" class="fixed inset-0 z-50 hidden flex items-center justify-center p-4 bg-black/75 backdrop-blur-sm">
-        <div class="glass-modal w-full max-w-md rounded-3xl p-6 shadow-2xl relative border border-gray-700">
-            <button onclick="app.closeModal('modal-event')" class="absolute top-4 right-4 text-gray-400 hover:text-white">
-                <i class="fa-solid fa-xmark text-xl"></i>
-            </button>
-            <h3 class="text-xl font-extrabold text-white mb-4 flex items-center gap-2">
-                <i class="fa-solid fa-calendar-plus text-brand-500"></i>
-                <span>Novo Rolê / Viagem</span>
-            </h3>
-            
-            <form onsubmit="app.createEvent(event)" class="space-y-4">
-                <div>
-                    <label class="block text-xs font-semibold text-gray-300 uppercase tracking-wider mb-1">Nome do Rolê</label>
-                    <input type="text" id="event-title-input" required placeholder="Ex: Viagem Floripa, Churrasco de Domingo" 
-                           class="w-full bg-slate-900/90 border border-gray-700 rounded-xl px-4 py-2.5 text-white text-sm focus:outline-none focus:border-brand-500">
-                </div>
-                
-                <div>
-                    <label class="block text-xs font-semibold text-gray-300 uppercase tracking-wider mb-1">Ícone / Emoji</label>
-                    <div class="flex space-x-2">
-                        <input type="text" id="event-emoji-input" value="🍻" maxlength="2" 
-                               class="w-16 text-center bg-slate-900/90 border border-gray-700 rounded-xl px-3 py-2.5 text-white text-lg focus:outline-none focus:border-brand-500">
-                        <span class="text-xs text-gray-400 flex items-center">Digite um emoji (ex: 🏖️, 🚗, 🍖, 🍕)</span>
-                    </div>
-                </div>
-
-                <div>
-                    <label class="block text-xs font-semibold text-gray-300 uppercase tracking-wider mb-1">Descrição</label>
-                    <input type="text" id="event-desc-input" placeholder="Ex: Casa de praia no feriado" 
-                           class="w-full bg-slate-900/90 border border-gray-700 rounded-xl px-4 py-2.5 text-white text-sm focus:outline-none focus:border-brand-500">
-                </div>
-
-                <div class="pt-2 flex space-x-3">
-                    <button type="button" onclick="app.closeModal('modal-event')" class="w-1/2 py-2.5 bg-gray-800 hover:bg-gray-700 text-gray-300 font-semibold text-xs rounded-xl">Cancelar</button>
-                    <button type="submit" class="w-1/2 py-2.5 bg-brand-500 hover:bg-brand-400 text-slate-950 font-bold text-xs rounded-xl shadow-lg shadow-brand-500/25">Criar Evento</button>
-                </div>
-            </form>
-        </div>
+  <!-- Main Content Container -->
+  <main class="flex-1 max-w-lg w-full mx-auto p-4 space-y-6 pb-24">
+    <!-- Seção Inicial -->
+    <div class="flex items-center justify-between">
+      <div>
+        <h2 class="text-xl font-bold tracking-tight text-white">Seus Grupos e Rolês</h2>
+        <p class="text-xs text-gray-400">Selecione um evento ativo ou crie um novo para rachar.</p>
+      </div>
+      <button class="px-4 py-2 bg-gradient-to-r from-brand-500 to-brand-cyan text-darkbg font-bold text-xs rounded-xl shadow-lg shadow-brand-500/20 hover:opacity-95 transition flex items-center gap-2">
+        <i class="fa-solid fa-folder-plus"></i> Criar Evento
+      </button>
     </div>
 
-    <!-- MODAL: ADD EXPENSE WITH RECEIPT & CUSTOM SPLIT -->
-    <div id="modal-expense" class="fixed inset-0 z-50 hidden flex items-center justify-center p-4 bg-black/75 backdrop-blur-sm">
-        <div class="glass-modal w-full max-w-lg rounded-3xl p-6 shadow-2xl relative border border-gray-700 max-h-[90vh] overflow-y-auto custom-scrollbar">
-            <button onclick="app.closeModal('modal-expense')" class="absolute top-4 right-4 text-gray-400 hover:text-white">
-                <i class="fa-solid fa-xmark text-xl"></i>
-            </button>
-            <h3 class="text-xl font-extrabold text-white mb-4 flex items-center gap-2">
-                <i class="fa-solid fa-cart-plus text-brand-cyan"></i>
-                <span>Adicionar Despesa</span>
-            </h3>
-            
-            <form onsubmit="app.addExpense(event)" class="space-y-4">
-                <div>
-                    <label class="block text-xs font-semibold text-gray-300 uppercase tracking-wider mb-1">O que foi comprado?</label>
-                    <input type="text" id="expense-title" required placeholder="Ex: Cerveja e Picanha, Uber pro Show" 
-                           class="w-full bg-slate-900/90 border border-gray-700 rounded-xl px-4 py-2.5 text-white text-sm focus:outline-none focus:border-brand-500">
-                </div>
-
-                <div class="grid grid-cols-2 gap-3">
-                    <div>
-                        <label class="block text-xs font-semibold text-gray-300 uppercase tracking-wider mb-1">Valor</label>
-                        <input type="number" step="0.01" min="0.01" id="expense-amount" required placeholder="0,00" 
-                               class="w-full bg-slate-900/90 border border-gray-700 rounded-xl px-4 py-2.5 text-white text-sm focus:outline-none focus:border-brand-500">
-                    </div>
-                    <div>
-                        <label class="block text-xs font-semibold text-gray-300 uppercase tracking-wider mb-1">Moeda</label>
-                        <select id="expense-currency" onchange="app.updateCurrencyConversionPreview()" class="w-full bg-slate-900/90 border border-gray-700 rounded-xl px-3 py-2.5 text-white text-sm focus:outline-none focus:border-brand-500">
-                            <option value="BRL">🇧🇷 Real (R$)</option>
-                            <option value="USD">🇺🇸 Dólar ($)</option>
-                            <option value="EUR">🇪🇺 Euro (€)</option>
-                            <option value="ARS">🇦🇷 Peso Arg ($)</option>
-                        </select>
-                    </div>
-                </div>
-
-                <div id="currency-conversion-notice" class="hidden text-[11px] text-brand-cyan bg-brand-cyan/10 p-2 rounded-xl border border-brand-cyan/30">
-                    Conversão estimada: <strong id="currency-conversion-text">R$ 0,00</strong>
-                </div>
-
-                <div class="grid grid-cols-2 gap-3">
-                    <div>
-                        <label class="block text-xs font-semibold text-gray-300 uppercase tracking-wider mb-1">Categoria</label>
-                        <select id="expense-category" class="w-full bg-slate-900/90 border border-gray-700 rounded-xl px-3 py-2.5 text-white text-sm focus:outline-none focus:border-brand-500">
-                            <option value="Comida">🍖 Comida</option>
-                            <option value="Bebida">🍺 Bebida</option>
-                            <option value="Transporte">🚗 Transporte</option>
-                            <option value="Hospedagem">🏠 Hospedagem</option>
-                            <option value="Outros">📦 Outros</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label class="block text-xs font-semibold text-gray-300 uppercase tracking-wider mb-1">Quem Pagou?</label>
-                        <select id="expense-payer" required class="w-full bg-slate-900/90 border border-gray-700 rounded-xl px-4 py-2.5 text-white text-sm focus:outline-none focus:border-brand-500">
-                            <!-- Injected JS -->
-                        </select>
-                    </div>
-                </div>
-
-                <!-- Custom Split Selection -->
-                <div>
-                    <div class="flex items-center justify-between mb-1.5">
-                        <label class="text-xs font-semibold text-gray-300 uppercase tracking-wider">Quem Consumiu / Participou?</label>
-                        <button type="button" onclick="app.toggleSelectAllParticipants()" class="text-[11px] text-brand-cyan hover:underline">Selecionar Todos</button>
-                    </div>
-                    <div id="expense-participants-checkboxes" class="space-y-2 max-h-36 overflow-y-auto p-3 bg-slate-900/60 rounded-xl border border-gray-800 custom-scrollbar">
-                        <!-- Injected JS -->
-                    </div>
-                </div>
-
-                <!-- Photo / Receipt Upload -->
-                <div>
-                    <label class="block text-xs font-semibold text-gray-300 uppercase tracking-wider mb-1">Comprovante / Recibo (Opcional)</label>
-                    <div class="flex items-center space-x-3">
-                        <label class="cursor-pointer px-4 py-2 bg-slate-800 hover:bg-slate-700 border border-gray-700 text-gray-300 rounded-xl text-xs font-semibold flex items-center space-x-2">
-                            <i class="fa-solid fa-paperclip text-brand-cyan"></i>
-                            <span>Anexar Imagem</span>
-                            <input type="file" id="expense-receipt-input" accept="image/*" onchange="app.handleReceiptUpload(event)" class="hidden">
-                        </label>
-                        <span id="receipt-filename" class="text-xs text-gray-400 truncate max-w-[180px]">Nenhum arquivo</span>
-                    </div>
-                    <div id="receipt-preview-container" class="hidden mt-2 relative">
-                        <img id="receipt-preview-img" src="" class="h-20 rounded-xl border border-gray-700 object-cover">
-                        <button type="button" onclick="app.clearReceiptUpload()" class="absolute -top-2 -right-2 bg-red-500 text-white w-5 h-5 rounded-full text-xs flex items-center justify-center">×</button>
-                    </div>
-                </div>
-
-                <div class="pt-2 flex space-x-3">
-                    <button type="button" onclick="app.closeModal('modal-expense')" class="w-1/2 py-2.5 bg-gray-800 hover:bg-gray-700 text-gray-300 font-semibold text-xs rounded-xl">Cancelar</button>
-                    <button type="submit" class="w-1/2 py-2.5 bg-brand-500 hover:bg-brand-400 text-slate-950 font-bold text-xs rounded-xl shadow-lg shadow-brand-500/25">Lançar Despesa</button>
-                </div>
-            </form>
+    <!-- Card de Evento de Exemplo -->
+    <div class="glass-panel rounded-2xl p-4 border border-white/5 relative overflow-hidden group hover:border-brand-500/30 transition shadow-xl">
+      <div class="flex items-start justify-between">
+        <div class="flex items-center space-x-3">
+          <div class="w-12 h-12 rounded-2xl bg-gradient-to-tr from-cyan-500/20 to-brand-500/20 flex items-center justify-center border border-white/10 text-xl">
+            🏖️
+          </div>
+          <div>
+            <h3 class="font-bold text-white text-base">Churrasco & Praia Floripa</h3>
+            <p class="text-xs text-gray-400">4 integrantes • 3 gastos</p>
+          </div>
         </div>
+        <button class="text-gray-500 hover:text-red-400 transition p-2">
+          <i class="fa-solid fa-trash-can text-sm"></i>
+        </button>
+      </div>
+
+      <div class="mt-4 pt-3 border-t border-white/5 flex items-center justify-between text-xs">
+        <span class="text-gray-400 font-medium">Total Acumulado:</span>
+        <span class="font-extrabold text-brand-400 text-sm">R$ 410,00</span>
+      </div>
     </div>
+  </main>
+
+  <!-- Bottom Navigation Bar -->
+  <nav class="glass-panel border-t border-white/5 fixed bottom-0 left-0 right-0 z-50 px-2 py-2 flex justify-around items-center">
+    <button class="flex flex-col items-center text-brand-400 py-1 px-3">
+      <i class="fa-solid fa-folder-open text-base mb-1"></i>
+      <span class="text-[10px] font-semibold">Rolês</span>
+    </button>
+    <button class="flex flex-col items-center text-gray-400 hover:text-gray-200 py-1 px-3 transition">
+      <i class="fa-solid fa-receipt text-base mb-1"></i>
+      <span class="text-[10px] font-medium">Gastos</span>
+    </button>
+    <button class="flex flex-col items-center text-gray-400 hover:text-gray-200 py-1 px-3 transition">
+      <i class="fa-solid fa-calculator text-base mb-1"></i>
+      <span class="text-[10px] font-medium">Acerto PIX</span>
+    </button>
+    <button class="flex flex-col items-center text-gray-400 hover:text-gray-200 py-1 px-3 transition">
+      <i class="fa-solid fa-trophy text-base mb-1"></i>
+      <span class="text-[10px] font-medium">Zueira</span>
+    </button>
+    <button class="flex flex-col items-center text-gray-400 hover:text-gray-200 py-1 px-3 transition">
+      <i class="fa-solid fa-crown text-base mb-1"></i>
+      <span class="text-[10px] font-medium">PRO</span>
+    </button>
+  </nav>
 
-    <!-- MODAL: ADD PARTICIPANT -->
-    <div id="modal-participant" class="fixed inset-0 z-50 hidden flex items-center justify-center p-4 bg-black/75 backdrop-blur-sm">
-        <div class="glass-modal w-full max-w-sm rounded-3xl p-6 shadow-2xl relative border border-gray-700">
-            <button onclick="app.closeModal('modal-participant')" class="absolute top-4 right-4 text-gray-400 hover:text-white">
-                <i class="fa-solid fa-xmark text-xl"></i>
-            </button>
-            <h3 class="text-xl font-extrabold text-white mb-4 flex items-center gap-2">
-                <i class="fa-solid fa-user-plus text-brand-500"></i>
-                <span>Novo Integrante</span>
-            </h3>
-            
-            <form onsubmit="app.addParticipant(event)" class="space-y-4">
-                <div>
-                    <label class="block text-xs font-semibold text-gray-300 uppercase tracking-wider mb-1">Nome</label>
-                    <input type="text" id="participant-name" required placeholder="Ex: Lucas, Amanda, Gabriel" 
-                           class="w-full bg-slate-900/90 border border-gray-700 rounded-xl px-4 py-2.5 text-white text-sm focus:outline-none focus:border-brand-500">
-                </div>
-
-                <div>
-                    <label class="block text-xs font-semibold text-gray-300 uppercase tracking-wider mb-1">Chave PIX (Opcional)</label>
-                    <input type="text" id="participant-pix" placeholder="CPF, Celular ou E-mail" 
-                           class="w-full bg-slate-900/90 border border-gray-700 rounded-xl px-4 py-2.5 text-white text-sm focus:outline-none focus:border-brand-500">
-                </div>
-
-                <div class="pt-2 flex space-x-3">
-                    <button type="button" onclick="app.closeModal('modal-participant')" class="w-1/2 py-2.5 bg-gray-800 hover:bg-gray-700 text-gray-300 font-semibold text-xs rounded-xl">Cancelar</button>
-                    <button type="submit" class="w-1/2 py-2.5 bg-brand-500 hover:bg-brand-400 text-slate-950 font-bold text-xs rounded-xl shadow-lg shadow-brand-500/25">Adicionar</button>
-                </div>
-            </form>
-        </div>
-    </div>
-
-    <!-- MODAL: PIX PAYMENT & GATEWAY SIMULATION -->
-    <div id="modal-pix" class="fixed inset-0 z-50 hidden flex items-center justify-center p-4 bg-black/75 backdrop-blur-sm">
-        <div class="glass-modal w-full max-w-sm rounded-3xl p-6 shadow-2xl relative border border-gray-700 text-center">
-            <button onclick="app.closeModal('modal-pix')" class="absolute top-4 right-4 text-gray-400 hover:text-white">
-                <i class="fa-solid fa-xmark text-xl"></i>
-            </button>
-
-            <div class="w-12 h-12 rounded-2xl bg-brand-500/20 text-brand-400 mx-auto flex items-center justify-center mb-3 text-2xl border border-brand-500/30 shadow-lg shadow-brand-500/20">
-                <i class="fa-solid fa-qrcode"></i>
-            </div>
-            
-            <h3 class="text-xl font-black text-white mb-0.5">Pagamento via PIX</h3>
-            <p class="text-xs text-gray-400 mb-4">Transferência direta sem complicações</p>
-
-            <div class="bg-slate-900/90 p-4 rounded-2xl border border-gray-800 mb-4 inline-block w-full">
-                <div class="w-36 h-36 bg-white p-2 rounded-2xl mx-auto flex items-center justify-center">
-                    <!-- SVG Simulated QR -->
-                    <svg class="w-full h-full text-slate-950" viewBox="0 0 100 100" fill="currentColor">
-                        <rect x="5" y="5" width="30" height="30" rx="4" />
-                        <rect x="10" y="10" width="20" height="20" fill="white" />
-                        <rect x="15" y="15" width="10" height="10" />
-                        <rect x="65" y="5" width="30" height="30" rx="4" />
-                        <rect x="70" y="10" width="20" height="20" fill="white" />
-                        <rect x="75" y="15" width="10" height="10" />
-                        <rect x="5" y="65" width="30" height="30" rx="4" />
-                        <rect x="10" y="70" width="20" height="20" fill="white" />
-                        <rect x="15" y="75" width="10" height="10" />
-                        <rect x="42" y="12" width="12" height="12" />
-                        <rect x="45" y="38" width="18" height="8" />
-                        <rect x="68" y="48" width="8" height="18" />
-                        <rect x="42" y="68" width="18" height="18" />
-                        <rect x="72" y="72" width="18" height="18" />
-                    </svg>
-                </div>
-                <div id="pix-modal-amount" class="text-xl font-extrabold text-brand-400 mt-3">R$ 0,00</div>
-                <div id="pix-modal-route" class="text-xs text-gray-300 mt-0.5">De Pessoa A ➔ Pessoa B</div>
-                <div class="mt-2 text-[10px] text-gray-500 bg-slate-800/80 p-1.5 rounded-lg border border-gray-700">
-                    Inclui R$ 1,00 de taxa de conveniência do app
-                </div>
-            </div>
-
-            <div class="space-y-2 text-left">
-                <label class="block text-[11px] font-semibold text-gray-400 uppercase tracking-wider">Chave PIX do Destinatário</label>
-                <div class="flex items-center bg-slate-900 border border-gray-700 rounded-xl px-3 py-2">
-                    <span id="pix-key-display" class="text-xs text-white truncate flex-1 font-mono">chave.pix@exemplo.com</span>
-                    <button onclick="app.copyPixKey()" class="text-xs text-brand-400 hover:text-brand-300 font-bold ml-2 flex items-center space-x-1">
-                        <i class="fa-solid fa-copy"></i>
-                        <span>Copiar</span>
-                    </button>
-                </div>
-            </div>
-
-            <button onclick="app.markAsSettled()" class="w-full mt-4 py-3 bg-brand-500 hover:bg-brand-400 text-slate-950 font-bold text-xs rounded-xl shadow-lg shadow-brand-500/20 active:scale-95 transition-all">
-                Marcar como Pago
-            </button>
-        </div>
-    </div>
-
-    <!-- MODAL: RECEIPT VIEW MODAL -->
-    <div id="modal-receipt-view" class="fixed inset-0 z-50 hidden flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
-        <div class="glass-modal w-full max-w-md rounded-3xl p-6 shadow-2xl relative border border-gray-700 text-center">
-            <button onclick="app.closeModal('modal-receipt-view')" class="absolute top-4 right-4 text-gray-400 hover:text-white">
-                <i class="fa-solid fa-xmark text-xl"></i>
-            </button>
-            <h3 class="text-lg font-bold text-white mb-3">Comprovante de Compra</h3>
-            <img id="modal-receipt-view-img" src="" class="w-full max-h-[60vh] object-contain rounded-2xl border border-gray-700">
-        </div>
-    </div>
-
-    <!-- TOAST NOTIFICATION CONTAINER -->
-    <div id="toast-container" class="fixed top-16 right-4 z-50 space-y-2 pointer-events-none"></div>
-
-    <!-- MAIN APP SCRIPT -->
-    <script>
-        /**
-         * "Eu Pago" Application Logic Engine
-         */
-        class EuPagoApp {
-            constructor() {
-                this.events = [];
-                this.activeEventId = null;
-                this.currentTab = 'events';
-                this.tempReceiptBase64 = null;
-                this.activePixTransaction = null;
-
-                // Fixed currency rates to BRL
-                this.currencyRates = {
-                    'BRL': 1.00,
-                    'USD': 5.50,
-                    'EUR': 6.00,
-                    'ARS': 0.0055
-                };
-
-                this.init();
-            }
-
-            init() {
-                this.loadData();
-                if (this.events.length === 0) {
-                    this.createDefaultDemoData();
-                } else if (!this.activeEventId && this.events.length > 0) {
-                    this.activeEventId = this.events[0].id;
-                }
-
-                this.render();
-            }
-
-            // Persistence
-            loadData() {
-                try {
-                    const saved = localStorage.getItem('eupago_app_data');
-                    if (saved) {
-                        const parsed = JSON.parse(saved);
-                        this.events = parsed.events || [];
-                        this.activeEventId = parsed.activeEventId || (this.events[0]?.id || null);
-                    }
-                } catch (e) {
-                    console.error("Erro ao carregar dados", e);
-                }
-            }
-
-            saveData() {
-                try {
-                    localStorage.setItem('eupago_app_data', JSON.stringify({
-                        events: this.events,
-                        activeEventId: this.activeEventId
-                    }));
-                } catch (e) {
-                    console.error("Erro ao salvar dados", e);
-                }
-            }
-
-            createDefaultDemoData() {
-                const demoEvent = {
-                    id: 'evt_' + Date.now(),
-                    title: 'Churrasco & Praia Floripa',
-                    emoji: '🏖️',
-                    description: 'Fim de semana na casa de praia',
-                    createdDate: new Date().toLocaleDateString('pt-BR'),
-                    participants: [
-                        { id: 'p1', name: 'Gabriel', pix: 'gabriel@pix.com' },
-                        { id: 'p2', name: 'Mariana', pix: '47999998888' },
-                        { id: 'p3', name: 'Lucas (Vegetariano)', pix: 'lucas@pix.com' },
-                        { id: 'p4', name: 'Beatriz', pix: 'beatriz.pix' }
-                    ],
-                    expenses: [
-                        {
-                            id: 'exp_1',
-                            title: 'Picanha e Linguiça',
-                            amount: 220.00,
-                            originalCurrency: 'BRL',
-                            amountBRL: 220.00,
-                            category: 'Comida',
-                            payerId: 'p1',
-                            participantsIds: ['p1', 'p2', 'p4'], // Lucas (Vegetariano) excluded
-                            date: new Date().toLocaleDateString('pt-BR'),
-                            receipt: null
-                        },
-                        {
-                            id: 'exp_2',
-                            title: 'Cervejas e Bebidas',
-                            amount: 140.00,
-                            originalCurrency: 'BRL',
-                            amountBRL: 140.00,
-                            category: 'Bebida',
-                            payerId: 'p2',
-                            participantsIds: ['p1', 'p2', 'p3', 'p4'],
-                            date: new Date().toLocaleDateString('pt-BR'),
-                            receipt: null
-                        },
-                        {
-                            id: 'exp_3',
-                            title: 'Gelo e Carvão',
-                            amount: 50.00,
-                            originalCurrency: 'BRL',
-                            amountBRL: 50.00,
-                            category: 'Outros',
-                            payerId: 'p3',
-                            participantsIds: ['p1', 'p2', 'p3', 'p4'],
-                            date: new Date().toLocaleDateString('pt-BR'),
-                            receipt: null
-                        }
-                    ]
-                };
-
-                this.events.push(demoEvent);
-                this.activeEventId = demoEvent.id;
-                this.saveData();
-            }
-
-            getActiveEvent() {
-                return this.events.find(e => e.id === this.activeEventId) || null;
-            }
-
-            // Tab Manager
-            switchTab(tabName) {
-                this.currentTab = tabName;
-                
-                ['events', 'expenses', 'settlement', 'stats', 'pro'].forEach(t => {
-                    const section = document.getElementById(`tab-${t}`);
-                    const navBtn = document.getElementById(`nav-${t}`);
-                    
-                    if (section) {
-                        section.classList.toggle('hidden', t !== tabName);
-                    }
-
-                    if (navBtn) {
-                        if (t === tabName) {
-                            navBtn.classList.remove('text-gray-400');
-                            navBtn.classList.add(t === 'pro' ? 'text-amber-400' : 'text-brand-400');
-                        } else {
-                            navBtn.classList.remove('text-brand-400', 'text-amber-400');
-                            navBtn.classList.add('text-gray-400');
-                        }
-                    }
-                });
-
-                this.render();
-            }
-
-            render() {
-                const activeEvent = this.getActiveEvent();
-                const activeHeader = document.getElementById('active-event-header');
-
-                if (activeEvent && this.currentTab !== 'events') {
-                    activeHeader.classList.remove('hidden');
-                    document.getElementById('current-event-title').innerText = activeEvent.title;
-                    document.getElementById('current-event-emoji').innerText = activeEvent.emoji || '🍻';
-                    document.getElementById('current-event-desc').innerText = activeEvent.description || 'Sem descrição';
-                    
-                    const totalCost = activeEvent.expenses.reduce((sum, exp) => sum + (exp.amountBRL || exp.amount), 0);
-                    document.getElementById('current-event-total').innerText = this.formatCurrency(totalCost);
-                } else {
-                    activeHeader.classList.add('hidden');
-                }
-
-                this.renderEventsGrid();
-                this.renderExpensesList();
-                this.renderParticipantsPills();
-                this.renderSettlementEngine();
-                this.renderStatsAndGamification();
-            }
-
-            // Render Events List
-            renderEventsGrid() {
-                const grid = document.getElementById('events-grid');
-                grid.innerHTML = '';
-
-                if (this.events.length === 0) {
-                    grid.innerHTML = `
-                        <div class="col-span-full text-center py-12 glass-panel rounded-3xl p-6">
-                            <i class="fa-solid fa-glass-cheers text-4xl text-gray-500 mb-3"></i>
-                            <h3 class="text-lg font-bold text-white">Nenhum rolê cadastrado</h3>
-                            <p class="text-xs text-gray-400 mt-1 mb-4">Crie um grupo para começar a organizar as contas.</p>
-                            <button onclick="app.openNewEventModal()" class="px-4 py-2 bg-brand-500 text-slate-950 font-bold rounded-xl text-xs">
-                                + Criar Primeiro Evento
-                            </button>
-                        </div>
-                    `;
-                    return;
-                }
-
-                this.events.forEach(evt => {
-                    const isSelected = evt.id === this.activeEventId;
-                    const totalCost = evt.expenses.reduce((sum, exp) => sum + (exp.amountBRL || exp.amount), 0);
-                    
-                    const card = document.createElement('div');
-                    card.className = `glass-panel p-5 rounded-2xl border transition-all cursor-pointer relative overflow-hidden ${
-                        isSelected ? 'border-brand-500 ring-2 ring-brand-500/20 bg-brand-900/10' : 'border-gray-800 hover:border-gray-700'
-                    }`;
-
-                    card.onclick = () => {
-                        this.activeEventId = evt.id;
-                        this.saveData();
-                        this.switchTab('expenses');
-                    };
-
-                    card.innerHTML = `
-                        <div class="flex items-start justify-between">
-                            <div class="flex items-center space-x-3">
-                                <span class="text-3xl p-2 rounded-xl bg-slate-900/80 border border-gray-800">${evt.emoji || '🍻'}</span>
-                                <div>
-                                    <h3 class="font-bold text-white text-base">${evt.title}</h3>
-                                    <p class="text-xs text-gray-400">${evt.participants.length} integrantes • ${evt.expenses.length} gastos</p>
-                                </div>
-                            </div>
-                            <button onclick="event.stopPropagation(); app.deleteEvent('${evt.id}')" class="text-gray-500 hover:text-red-400 text-xs p-1.5">
-                                <i class="fa-solid fa-trash"></i>
-                            </button>
-                        </div>
-                        <div class="mt-4 pt-3 border-t border-gray-800/80 flex items-center justify-between">
-                            <span class="text-xs text-gray-400">Total Acumulado:</span>
-                            <span class="text-sm font-extrabold text-brand-400">${this.formatCurrency(totalCost)}</span>
-                        </div>
-                    `;
-                    grid.appendChild(card);
-                });
-            }
-
-            // Render Participants Pills
-            renderParticipantsPills() {
-                const container = document.getElementById('participants-pills');
-                const countTag = document.getElementById('participants-count-tag');
-                container.innerHTML = '';
-
-                const activeEvent = this.getActiveEvent();
-                if (!activeEvent) return;
-
-                countTag.innerText = `${activeEvent.participants.length} pessoas`;
-
-                activeEvent.participants.forEach(p => {
-                    const pill = document.createElement('div');
-                    pill.className = 'flex items-center space-x-1.5 px-3 py-1 rounded-xl bg-slate-800/80 border border-gray-700 text-xs text-white';
-                    pill.innerHTML = `
-                        <span class="font-bold text-brand-cyan">${p.name}</span>
-                        <button onclick="app.deleteParticipant('${p.id}')" class="text-gray-500 hover:text-red-400 text-[10px] ml-1">×</button>
-                    `;
-                    container.appendChild(pill);
-                });
-            }
-
-            // Render Expenses Feed
-            renderExpensesList() {
-                const list = document.getElementById('expenses-list');
-                list.innerHTML = '';
-
-                const activeEvent = this.getActiveEvent();
-                if (!activeEvent || activeEvent.expenses.length === 0) {
-                    list.innerHTML = `
-                        <div class="text-center py-10 glass-panel rounded-2xl p-6 border border-gray-800">
-                            <i class="fa-solid fa-receipt text-3xl text-gray-500 mb-2"></i>
-                            <p class="text-sm font-bold text-gray-300">Nenhum gasto lançado neste rolê</p>
-                            <p class="text-xs text-gray-400 mt-0.5 mb-4">Adicione o que foi comprado e selecione quem participou.</p>
-                            <button onclick="app.openAddExpenseModal()" class="px-4 py-2 bg-brand-500 text-slate-950 font-bold rounded-xl text-xs shadow-md shadow-brand-500/20">
-                                + Lançar Primeira Despesa
-                            </button>
-                        </div>
-                    `;
-                    return;
-                }
-
-                const categoryIcons = {
-                    'Comida': '🍖',
-                    'Bebida': '🍺',
-                    'Transporte': '🚗',
-                    'Hospedagem': '🏠',
-                    'Outros': '📦'
-                };
-
-                activeEvent.expenses.forEach(exp => {
-                    const payer = activeEvent.participants.find(p => p.id === exp.payerId);
-                    const payerName = payer ? payer.name : 'Desconhecido';
-                    const amountBRL = exp.amountBRL || exp.amount;
-                    const perPerson = amountBRL / (exp.participantsIds.length || 1);
-
-                    const item = document.createElement('div');
-                    item.className = 'glass-panel p-4 rounded-2xl border border-gray-800 flex items-center justify-between hover:border-gray-700 transition-all';
-                    item.innerHTML = `
-                        <div class="flex items-center space-x-3.5">
-                            <span class="text-2xl p-2.5 rounded-2xl bg-slate-900/80 border border-gray-800">${categoryIcons[exp.category] || '💰'}</span>
-                            <div>
-                                <div class="flex items-center space-x-2">
-                                    <h4 class="font-bold text-white text-sm">${exp.title}</h4>
-                                    ${exp.originalCurrency && exp.originalCurrency !== 'BRL' ? `
-                                        <span class="text-[10px] bg-brand-cyan/20 text-brand-cyan font-bold px-1.5 py-0.5 rounded border border-brand-cyan/30">
-                                            ${exp.originalCurrency} ${exp.amount.toFixed(2)}
-                                        </span>
-                                    ` : ''}
-                                </div>
-                                <p class="text-xs text-gray-400 mt-0.5">
-                                    Pago por <strong class="text-brand-cyan">${payerName}</strong> • ${exp.participantsIds.length} pessoa(s) (${this.formatCurrency(perPerson)}/cada)
-                                </p>
-                            </div>
-                        </div>
-                        <div class="flex items-center space-x-3">
-                            ${exp.receipt ? `
-                                <button onclick="app.viewReceipt('${exp.receipt}')" class="p-2 text-brand-cyan hover:bg-slate-800 rounded-xl text-xs" title="Ver Comprovante">
-                                    <i class="fa-solid fa-paperclip text-sm"></i>
-                                </button>
-                            ` : ''}
-                            <div class="text-right">
-                                <div class="font-black text-white text-sm">${this.formatCurrency(amountBRL)}</div>
-                                <div class="text-[10px] text-gray-500">${exp.date || ''}</div>
-                            </div>
-                            <button onclick="app.deleteExpense('${exp.id}')" class="text-gray-500 hover:text-red-400 text-xs p-1">
-                                <i class="fa-solid fa-trash"></i>
-                            </button>
-                        </div>
-                    `;
-                    list.appendChild(item);
-                });
-            }
-
-            // Render Tab 3: Settlement Engine
-            renderSettlementEngine() {
-                const activeEvent = this.getActiveEvent();
-                const balancesContainer = document.getElementById('settlement-balances');
-                const transactionsContainer = document.getElementById('settlement-transactions');
-
-                balancesContainer.innerHTML = '';
-                transactionsContainer.innerHTML = '';
-
-                if (!activeEvent || activeEvent.participants.length === 0) {
-                    balancesContainer.innerHTML = `<p class="text-xs text-gray-400 col-span-full">Adicione participantes para calcular o acerto.</p>`;
-                    return;
-                }
-
-                // 1. Compute Balances
-                const netBalances = {};
-                activeEvent.participants.forEach(p => { netBalances[p.id] = 0; });
-
-                activeEvent.expenses.forEach(exp => {
-                    const payerId = exp.payerId;
-                    const amountBRL = exp.amountBRL || exp.amount;
-                    const participants = exp.participantsIds || [];
-                    if (participants.length === 0) return;
-
-                    const splitAmount = amountBRL / participants.length;
-
-                    if (netBalances[payerId] !== undefined) {
-                        netBalances[payerId] += amountBRL;
-                    }
-
-                    participants.forEach(pid => {
-                        if (netBalances[pid] !== undefined) {
-                            netBalances[pid] -= splitAmount;
-                        }
-                    });
-                });
-
-                // Display Balances Cards
-                activeEvent.participants.forEach(p => {
-                    const balance = netBalances[p.id] || 0;
-                    const isPositive = balance >= 0.01;
-                    const isNegative = balance <= -0.01;
-
-                    const card = document.createElement('div');
-                    card.className = 'glass-panel p-3.5 rounded-2xl border border-gray-800 flex items-center justify-between';
-                    card.innerHTML = `
-                        <div class="flex items-center space-x-2.5">
-                            <div class="w-9 h-9 rounded-xl bg-slate-800 border border-gray-700 flex items-center justify-center font-bold text-xs text-brand-400">
-                                ${p.name.charAt(0).toUpperCase()}
-                            </div>
-                            <div>
-                                <h4 class="text-xs font-bold text-white">${p.name}</h4>
-                                <span class="text-[10px] text-gray-400">${isPositive ? 'A receber' : isNegative ? 'Devendo' : 'Quitado'}</span>
-                            </div>
-                        </div>
-                        <div class="text-right">
-                            <span class="text-xs font-extrabold ${
-                                isPositive ? 'text-emerald-400' : isNegative ? 'text-red-400' : 'text-gray-400'
-                            }">
-                                ${isPositive ? '+' : ''}${this.formatCurrency(balance)}
-                            </span>
-                        </div>
-                    `;
-                    balancesContainer.appendChild(card);
-                });
-
-                // 2. Settlement Optimization Algorithm
-                const debtors = [];
-                const creditors = [];
-
-                Object.keys(netBalances).forEach(pid => {
-                    const val = netBalances[pid];
-                    if (val < -0.01) {
-                        debtors.push({ id: pid, amount: Math.abs(val) });
-                    } else if (val > 0.01) {
-                        creditors.push({ id: pid, amount: val });
-                    }
-                });
-
-                const transactions = [];
-                let dIdx = 0;
-                let cIdx = 0;
-
-                while (dIdx < debtors.length && cIdx < creditors.length) {
-                    const debtor = debtors[dIdx];
-                    const creditor = creditors[cIdx];
-
-                    const settlementAmount = Math.min(debtor.amount, creditor.amount);
-
-                    transactions.push({
-                        fromId: debtor.id,
-                        toId: creditor.id,
-                        amount: settlementAmount
-                    });
-
-                    debtor.amount -= settlementAmount;
-                    creditor.amount -= settlementAmount;
-
-                    if (debtor.amount < 0.01) dIdx++;
-                    if (creditor.amount < 0.01) cIdx++;
-                }
-
-                if (transactions.length === 0) {
-                    transactionsContainer.innerHTML = `
-                        <div class="glass-panel p-5 rounded-2xl text-center border border-gray-800">
-                            <i class="fa-solid fa-circle-check text-emerald-400 text-3xl mb-1"></i>
-                            <h4 class="text-sm font-bold text-white">Contas Zeradas!</h4>
-                            <p class="text-xs text-gray-400">Ninguém deve nada para ninguém neste evento.</p>
-                        </div>
-                    `;
-                    return;
-                }
-
-                transactions.forEach(t => {
-                    const debtor = activeEvent.participants.find(p => p.id === t.fromId);
-                    const creditor = activeEvent.participants.find(p => p.id === t.toId);
-
-                    const div = document.createElement('div');
-                    div.className = 'glass-panel p-4 rounded-2xl border border-gray-800 flex items-center justify-between bg-gradient-to-r from-slate-900/80 to-slate-900/40';
-                    div.innerHTML = `
-                        <div class="flex items-center space-x-3">
-                            <div class="text-xs text-gray-200">
-                                <span class="font-extrabold text-red-400">${debtor ? debtor.name : 'Pessoa'}</span> 
-                                <i class="fa-solid fa-arrow-right text-brand-cyan mx-1.5"></i> 
-                                <span class="font-extrabold text-emerald-400">${creditor ? creditor.name : 'Pessoa'}</span>
-                            </div>
-                        </div>
-                        <div class="flex items-center space-x-3">
-                            <span class="text-sm font-black text-white">${this.formatCurrency(t.amount)}</span>
-                            <button onclick="app.openPixModal('${debtor ? debtor.name : ''}', '${creditor ? creditor.name : ''}', ${t.amount}, '${creditor ? creditor.pix : ''}', '${t.fromId}', '${t.toId}')" 
-                                    class="px-3.5 py-1.5 bg-brand-500 hover:bg-brand-400 text-slate-950 font-bold rounded-xl text-xs flex items-center space-x-1.5 shadow-md shadow-brand-500/20 active:scale-95 transition-all">
-                                <i class="fa-solid fa-qrcode"></i>
-                                <span>Pagar PIX</span>
-                            </button>
-                        </div>
-                    `;
-                    transactionsContainer.appendChild(div);
-                });
-            }
-
-            // Render Tab 4: Gamification Badges & Category Breakdown
-            renderStatsAndGamification() {
-                const activeEvent = this.getActiveEvent();
-                if (!activeEvent || activeEvent.participants.length === 0) return;
-
-                // Total paid per participant
-                const totalPaidPerUser = {};
-                const totalOwedPerUser = {};
-                activeEvent.participants.forEach(p => { 
-                    totalPaidPerUser[p.id] = 0;
-                    totalOwedPerUser[p.id] = 0;
-                });
-
-                activeEvent.expenses.forEach(exp => {
-                    const amountBRL = exp.amountBRL || exp.amount;
-                    if (totalPaidPerUser[exp.payerId] !== undefined) {
-                        totalPaidPerUser[exp.payerId] += amountBRL;
-                    }
-
-                    const split = amountBRL / (exp.participantsIds.length || 1);
-                    exp.participantsIds.forEach(pid => {
-                        if (totalOwedPerUser[pid] !== undefined) {
-                            totalOwedPerUser[pid] += split;
-                        }
-                    });
-                });
-
-                // Find "O Patrão" (Highest Spender)
-                let patraoId = null, maxSpent = -1;
-                Object.keys(totalPaidPerUser).forEach(pid => {
-                    if (totalPaidPerUser[pid] > maxSpent) {
-                        maxSpent = totalPaidPerUser[pid];
-                        patraoId = pid;
-                    }
-                });
-
-                const patrao = activeEvent.participants.find(p => p.id === patraoId);
-                document.getElementById('stat-patrao-name').innerText = patrao ? patrao.name : 'Ninguém';
-                document.getElementById('stat-patrao-val').innerText = this.formatCurrency(maxSpent > 0 ? maxSpent : 0);
-
-                // Find "Mão de Vaca" (Lowest Spender)
-                let maodevacaId = null, minSpent = Infinity;
-                Object.keys(totalPaidPerUser).forEach(pid => {
-                    if (totalPaidPerUser[pid] < minSpent) {
-                        minSpent = totalPaidPerUser[pid];
-                        maodevacaId = pid;
-                    }
-                });
-
-                const maodevaca = activeEvent.participants.find(p => p.id === maodevacaId);
-                document.getElementById('stat-maodevaca-name').innerText = maodevaca ? maodevaca.name : 'Ninguém';
-                document.getElementById('stat-maodevaca-val').innerText = this.formatCurrency(minSpent < Infinity ? minSpent : 0);
-
-                // Find "Maior Devedor" (Highest Net Negative Balance)
-                let caloteiroId = null, maxDebt = 0;
-                activeEvent.participants.forEach(p => {
-                    const net = totalPaidPerUser[p.id] - totalOwedPerUser[p.id];
-                    if (net < maxDebt) {
-                        maxDebt = net;
-                        caloteiroId = p.id;
-                    }
-                });
-
-                const caloteiro = activeEvent.participants.find(p => p.id === caloteiroId);
-                document.getElementById('stat-caloteiro-name').innerText = caloteiro ? caloteiro.name : 'Nenhum!';
-                document.getElementById('stat-caloteiro-val').innerText = this.formatCurrency(Math.abs(maxDebt));
-
-                // Spending by Category
-                const categoryTotals = {};
-                let overallTotal = 0;
-
-                activeEvent.expenses.forEach(exp => {
-                    const amountBRL = exp.amountBRL || exp.amount;
-                    categoryTotals[exp.category] = (categoryTotals[exp.category] || 0) + amountBRL;
-                    overallTotal += amountBRL;
-                });
-
-                const barsContainer = document.getElementById('category-bars-container');
-                barsContainer.innerHTML = '';
-
-                if (overallTotal === 0) {
-                    barsContainer.innerHTML = `<p class="text-xs text-gray-400">Nenhum gasto registrado.</p>`;
-                    return;
-                }
-
-                Object.keys(categoryTotals).forEach(cat => {
-                    const val = categoryTotals[cat];
-                    const pct = Math.round((val / overallTotal) * 100);
-
-                    const div = document.createElement('div');
-                    div.className = 'space-y-1';
-                    div.innerHTML = `
-                        <div class="flex justify-between text-xs font-semibold text-gray-300">
-                            <span>${cat}</span>
-                            <span>${this.formatCurrency(val)} (${pct}%)</span>
-                        </div>
-                        <div class="w-full bg-slate-900 rounded-full h-2.5 border border-gray-800">
-                            <div class="bg-gradient-to-r from-brand-500 to-brand-cyan h-2.5 rounded-full" style="width: ${pct}%"></div>
-                        </div>
-                    `;
-                    barsContainer.appendChild(div);
-                });
-            }
-
-            // Actions & Event Creators
-            createEvent(e) {
-                e.preventDefault();
-                const title = document.getElementById('event-title-input').value.trim();
-                const emoji = document.getElementById('event-emoji-input').value.trim() || '🍻';
-                const desc = document.getElementById('event-desc-input').value.trim();
-
-                const newEvent = {
-                    id: 'evt_' + Date.now(),
-                    title: title,
-                    emoji: emoji,
-                    description: desc,
-                    createdDate: new Date().toLocaleDateString('pt-BR'),
-                    participants: [
-                        { id: 'p_' + Date.now(), name: 'Você (Organizador)', pix: '' }
-                    ],
-                    expenses: []
-                };
-
-                this.events.unshift(newEvent);
-                this.activeEventId = newEvent.id;
-                this.saveData();
-
-                this.closeModal('modal-event');
-                this.showToast('Rolê criado com sucesso!');
-                this.switchTab('expenses');
-            }
-
-            deleteEvent(eventId) {
-                this.events = this.events.filter(e => e.id !== eventId);
-                if (this.activeEventId === eventId) {
-                    this.activeEventId = this.events[0]?.id || null;
-                }
-                this.saveData();
-                this.render();
-                this.showToast('Evento excluído.');
-            }
-
-            addParticipant(e) {
-                e.preventDefault();
-                const activeEvent = this.getActiveEvent();
-                if (!activeEvent) return;
-
-                const name = document.getElementById('participant-name').value.trim();
-                const pix = document.getElementById('participant-pix').value.trim();
-
-                activeEvent.participants.push({
-                    id: 'p_' + Date.now(),
-                    name: name,
-                    pix: pix
-                });
-
-                this.saveData();
-                this.closeModal('modal-participant');
-                this.render();
-                this.showToast(`${name} adicionado ao grupo!`);
-            }
-
-            deleteParticipant(participantId) {
-                const activeEvent = this.getActiveEvent();
-                if (!activeEvent) return;
-
-                activeEvent.participants = activeEvent.participants.filter(p => p.id !== participantId);
-                this.saveData();
-                this.render();
-                this.showToast('Participante removido.');
-            }
-
-            addExpense(e) {
-                e.preventDefault();
-                const activeEvent = this.getActiveEvent();
-                if (!activeEvent) return;
-
-                const title = document.getElementById('expense-title').value.trim();
-                const amount = parseFloat(document.getElementById('expense-amount').value);
-                const currency = document.getElementById('expense-currency').value;
-                const category = document.getElementById('expense-category').value;
-                const payerId = document.getElementById('expense-payer').value;
-
-                const rate = this.currencyRates[currency] || 1.0;
-                const amountBRL = amount * rate;
-
-                const checkboxes = document.querySelectorAll('.expense-participant-checkbox:checked');
-                const selectedParticipantsIds = Array.from(checkboxes).map(cb => cb.value);
-
-                if (selectedParticipantsIds.length === 0) {
-                    alert('Selecione pelo menos um participante para dividir o gasto.');
-                    return;
-                }
-
-                const newExpense = {
-                    id: 'exp_' + Date.now(),
-                    title: title,
-                    amount: amount,
-                    originalCurrency: currency,
-                    amountBRL: amountBRL,
-                    category: category,
-                    payerId: payerId,
-                    participantsIds: selectedParticipantsIds,
-                    date: new Date().toLocaleDateString('pt-BR'),
-                    receipt: this.tempReceiptBase64
-                };
-
-                activeEvent.expenses.unshift(newExpense);
-                this.saveData();
-                this.clearReceiptUpload();
-                this.closeModal('modal-expense');
-                this.render();
-                this.showToast('Despesa lançada no evento!');
-            }
-
-            deleteExpense(expenseId) {
-                const activeEvent = this.getActiveEvent();
-                if (!activeEvent) return;
-
-                activeEvent.expenses = activeEvent.expenses.filter(exp => exp.id !== expenseId);
-                this.saveData();
-                this.render();
-                this.showToast('Despesa removida.');
-            }
-
-            // Currency conversion helper
-            updateCurrencyConversionPreview() {
-                const currency = document.getElementById('expense-currency').value;
-                const amount = parseFloat(document.getElementById('expense-amount').value) || 0;
-                const notice = document.getElementById('currency-conversion-notice');
-                const text = document.getElementById('currency-conversion-text');
-
-                if (currency !== 'BRL' && amount > 0) {
-                    const converted = amount * (this.currencyRates[currency] || 1.0);
-                    text.innerText = this.formatCurrency(converted);
-                    notice.classList.remove('hidden');
-                } else {
-                    notice.classList.add('hidden');
-                }
-            }
-
-            // Receipt Attachments
-            handleReceiptUpload(e) {
-                const file = e.target.files[0];
-                if (!file) return;
-
-                document.getElementById('receipt-filename').innerText = file.name;
-
-                const reader = new FileReader();
-                reader.onload = (event) => {
-                    this.tempReceiptBase64 = event.target.result;
-                    document.getElementById('receipt-preview-img').src = this.tempReceiptBase64;
-                    document.getElementById('receipt-preview-container').classList.remove('hidden');
-                };
-                reader.readAsDataURL(file);
-            }
-
-            clearReceiptUpload() {
-                this.tempReceiptBase64 = null;
-                document.getElementById('expense-receipt-input').value = '';
-                document.getElementById('receipt-filename').innerText = 'Nenhum arquivo';
-                document.getElementById('receipt-preview-container').classList.add('hidden');
-            }
-
-            viewReceipt(base64Url) {
-                document.getElementById('modal-receipt-view-img').src = base64Url;
-                document.getElementById('modal-receipt-view').classList.remove('hidden');
-            }
-
-            // Modals & UI Helpers
-            openNewEventModal() {
-                document.getElementById('event-title-input').value = '';
-                document.getElementById('event-desc-input').value = '';
-                document.getElementById('modal-event').classList.remove('hidden');
-            }
-
-            openAddParticipantModal() {
-                document.getElementById('participant-name').value = '';
-                document.getElementById('participant-pix').value = '';
-                document.getElementById('modal-participant').classList.remove('hidden');
-            }
-
-            openAddExpenseModal() {
-                const activeEvent = this.getActiveEvent();
-                if (!activeEvent || activeEvent.participants.length === 0) {
-                    alert('Adicione pelo menos um integrante ao evento antes de lançar despesas.');
-                    return;
-                }
-
-                document.getElementById('expense-title').value = '';
-                document.getElementById('expense-amount').value = '';
-                document.getElementById('currency-conversion-notice').classList.add('hidden');
-
-                // Payer Select
-                const payerSelect = document.getElementById('expense-payer');
-                payerSelect.innerHTML = activeEvent.participants.map(p => 
-                    `<option value="${p.id}">${p.name}</option>`
-                ).join('');
-
-                // Custom split checkboxes
-                const checkboxesContainer = document.getElementById('expense-participants-checkboxes');
-                checkboxesContainer.innerHTML = activeEvent.participants.map(p => `
-                    <label class="flex items-center space-x-2.5 text-xs text-gray-200 cursor-pointer p-1.5 rounded-lg hover:bg-slate-800">
-                        <input type="checkbox" value="${p.id}" checked class="expense-participant-checkbox rounded bg-slate-900 border-gray-700 text-brand-500 focus:ring-brand-500 w-4 h-4">
-                        <span>${p.name}</span>
-                    </label>
-                `).join('');
-
-                this.clearReceiptUpload();
-                document.getElementById('modal-expense').classList.remove('hidden');
-            }
-
-            toggleSelectAllParticipants() {
-                const checkboxes = document.querySelectorAll('.expense-participant-checkbox');
-                const allChecked = Array.from(checkboxes).every(cb => cb.checked);
-                checkboxes.forEach(cb => cb.checked = !allChecked);
-            }
-
-            openPixModal(debtorName, creditorName, amount, pixKey, debtorId, creditorId) {
-                const totalWithFee = amount + 1.00; // R$ 1,00 convenience fee
-                this.activePixTransaction = { debtorId, creditorId, amount };
-
-                document.getElementById('pix-modal-amount').innerText = this.formatCurrency(totalWithFee);
-                document.getElementById('pix-modal-route').innerText = `${debtorName} ➔ ${creditorName}`;
-                document.getElementById('pix-key-display').innerText = pixKey || `${creditorName.toLowerCase().replace(/\s+/g, '')}@pix.com`;
-                document.getElementById('modal-pix').classList.remove('hidden');
-            }
-
-            markAsSettled() {
-                if (!this.activePixTransaction) {
-                    this.closeModal('modal-pix');
-                    return;
-                }
-
-                const activeEvent = this.getActiveEvent();
-                if (!activeEvent) return;
-
-                const debtor = activeEvent.participants.find(p => p.id === this.activePixTransaction.debtorId);
-                const creditor = activeEvent.participants.find(p => p.id === this.activePixTransaction.creditorId);
-
-                // Add offsetting adjustment expense to mark as paid
-                activeEvent.expenses.unshift({
-                    id: 'exp_' + Date.now(),
-                    title: `Acerto PIX: ${debtor ? debtor.name : 'Pessoa'} ➔ ${creditor ? creditor.name : 'Pessoa'}`,
-                    amount: this.activePixTransaction.amount,
-                    originalCurrency: 'BRL',
-                    amountBRL: this.activePixTransaction.amount,
-                    category: 'Outros',
-                    payerId: this.activePixTransaction.debtorId,
-                    participantsIds: [this.activePixTransaction.creditorId],
-                    date: new Date().toLocaleDateString('pt-BR'),
-                    receipt: null
-                });
-
-                this.saveData();
-                this.closeModal('modal-pix');
-                this.render();
-                this.showToast('Pagamento confirmado e conta ajustada!');
-            }
-
-            closeModal(modalId) {
-                document.getElementById(modalId).classList.add('hidden');
-            }
-
-            copyPixKey() {
-                const keyText = document.getElementById('pix-key-display').innerText;
-                const textarea = document.createElement('textarea');
-                textarea.value = keyText;
-                document.body.appendChild(textarea);
-                textarea.select();
-                document.execCommand('copy');
-                document.body.removeChild(textarea);
-
-                this.showToast('Chave PIX copiada!');
-            }
-
-            simulateSubscription() {
-                this.showToast('🎉 Teste Grátis do Eu Pago PRO ativado!');
-            }
-
-            formatCurrency(val) {
-                return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(val || 0);
-            }
-
-            showToast(msg) {
-                const container = document.getElementById('toast-container');
-                const toast = document.createElement('div');
-                toast.className = 'glass-modal border border-brand-500/40 text-brand-400 px-4 py-2.5 rounded-2xl text-xs font-bold shadow-xl flex items-center space-x-2 animate-bounce';
-                toast.innerHTML = `<i class="fa-solid fa-circle-check text-brand-400"></i> <span>${msg}</span>`;
-                
-                container.appendChild(toast);
-                setTimeout(() => {
-                    toast.remove();
-                }, 3000);
-            }
-        }
-
-        // Initialize App on DOM Load
-        let app;
-        window.onload = () => {
-            app = new EuPagoApp();
-        };
-    </script>
 </body>
-</html>
-```
+</html>w
